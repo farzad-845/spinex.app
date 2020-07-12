@@ -1,6 +1,6 @@
 {
-  "name": "Icons",
+  "name": "Item",
   "version": "0.0.0",
-  "main": "Icons.js",
+  "main": "Items.js",
   "private": true
 }
