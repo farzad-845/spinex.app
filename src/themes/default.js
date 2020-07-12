@@ -1,10 +1,10 @@
 import tinycolor from "tinycolor2";
 
-const primary = "#536DFE";
-const secondary = "#FF5C93";
-const warning = "#FFC260";
-const success = "#3CD4A0";
-const info = "#9013FE";
+const primary = "#383e56";
+const secondary = "#f69e7b";
+const warning = "#d4b5b0";
+const success = "#14b1ab";
+const info = "#eedad1";
 
 const lightenRate = 7.5;
 const darkenRate = 15;

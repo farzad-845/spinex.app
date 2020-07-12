@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import axios from "axios";
 import { ThemeProvider } from "@material-ui/styles";
 import { CssBaseline } from "@material-ui/core";
 
@@ -8,6 +9,11 @@ import App from "./components/App";
 import * as serviceWorker from "./serviceWorker";
 import { LayoutProvider } from "./context/LayoutContext";
 import { UserProvider } from "./context/UserContext";
+
+axios.defaults.baseURL = "https://coin-giftcard.com/spinexapp/";
+axios.defaults.headers.common["Content-Type"] = "application/json";
+const token = localStorage.getItem("token");
+if (token) axios.defaults.headers.common["x-auth-token"] = token;
 
 ReactDOM.render(
   <LayoutProvider>
