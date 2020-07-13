@@ -12,11 +12,14 @@ import {
   TextField,
 } from "@material-ui/core";
 import {
+  Check as CheckIcon,
   Close as CloseIcon,
   PhotoCamera as PhotoCameraIcon,
 } from "@material-ui/icons";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import useAutocomplete from "@material-ui/lab/useAutocomplete";
+import NoSsr from "@material-ui/core/NoSsr";
 
+import styled from "styled-components";
 import axios from "axios";
 import React from "react";
 import { withRouter } from "react-router-dom";
@@ -27,16 +30,133 @@ import Widget from "../../components/Widget";
 import { Button, Typography } from "../../components/Wrappers";
 import useStyles from "./styles";
 
+const Label = styled("label")`
+  padding: 0 0 4px;
+  line-height: 1.5;
+  display: block;
+`;
+
+const InputWrapper = styled("div")`
+  width: 100%;
+  border: 1px solid #d9d9d9;
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 1px;
+  display: flex;
+  flex-wrap: wrap;
+
+  &:hover {
+    border-color: #40a9ff;
+  }
+
+  &.focused {
+    border-color: #40a9ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+
+  & input {
+    font-size: 14px;
+    height: 30px;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    width: 0;
+    min-width: 30px;
+    flex-grow: 1;
+    border: 0;
+    margin: 0;
+    outline: 0;
+  }
+`;
+
+const Tag = styled(({ label, onDelete, ...props }) => (
+  <div {...props}>
+    <span>{label}</span>
+    <CloseIcon onClick={onDelete} />
+  </div>
+))`
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 2px;
+  line-height: 22px;
+  background-color: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
+  box-sizing: content-box;
+  padding: 0 4px 0 10px;
+  outline: 0;
+  overflow: hidden;
+
+  &:focus {
+    border-color: #40a9ff;
+    background-color: #e6f7ff;
+  }
+
+  & span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  & svg {
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px;
+  }
+`;
+
+const Listbox = styled("ul")`
+  width: 300px;
+  margin: 2px 0 0;
+  padding: 0;
+  position: absolute;
+  list-style: none;
+  background-color: #fff;
+  overflow: auto;
+  max-height: 250px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+
+  & li {
+    padding: 5px 12px;
+    display: flex;
+
+    & span {
+      flex-grow: 1;
+    }
+
+    & svg {
+      color: transparent;
+    }
+  }
+
+  & li[aria-selected="true"] {
+    background-color: #fafafa;
+    font-weight: 600;
+
+    & svg {
+      color: #1890ff;
+    }
+  }
+
+  & li[data-focus="true"] {
+    background-color: #e6f7ff;
+    cursor: pointer;
+
+    & svg {
+      color: #000;
+    }
+  }
+`;
+
 function FormsElements() {
   const classes = useStyles();
 
   var promise = Promise.resolve();
   const [items, setItems] = React.useState([]);
-  //const [providers, setProviders] = React.useState([]);
+  const [providers, setProviders] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [open, setOpen] = React.useState(false);
-  const [options, setOptions] = React.useState([]);
-  const loading = open && options.length === 0;
   const [providerDetail, setProviderDetail] = React.useState({
     name: "",
     code: "",
@@ -46,8 +166,26 @@ function FormsElements() {
     reqAddProviderToItemCode,
     AddDataToReqAddProviderToItemCode,
   ] = React.useState({
+    name: "",
     _ids: [],
-    itemIds: [],
+  });
+
+  const {
+    getRootProps,
+    getInputLabelProps,
+    getInputProps,
+    getTagProps,
+    getListboxProps,
+    getOptionProps,
+    groupedOptions,
+    value,
+    focused,
+    setAnchorEl,
+  } = useAutocomplete({
+    id: "customized-hook-demo",
+    multiple: true,
+    options: items,
+    getOptionLabel: option => option.title,
   });
 
   function sendNotification(notification_options = {}) {
@@ -78,6 +216,12 @@ function FormsElements() {
       options,
     );
   }
+  const handleProvidersChange = e =>
+    AddDataToReqAddProviderToItemCode({
+      ...reqAddProviderToItemCode,
+      _ids: [providers.filter(pr => pr.value === e.target.value)[0].id],
+      name: e.target.value,
+    });
 
   const handleAddNewProvider = async () => {
     setIsLoading(true);
@@ -105,13 +249,14 @@ function FormsElements() {
       formData.append("name", name);
       await axios.post("/admin/providers/add", formData);
       sendNotification({
-        message: "category added successfully",
+        message: "provider added successfully",
         color: "primary",
       });
+      fetchItemsData();
       setIsLoading(false);
     } catch (ex) {
       sendNotification({
-        message: "an error has been occurred when try to add category",
+        message: "an error has been occurred when try to add provider",
         color: "secondary",
       });
       setIsLoading(false);
@@ -121,9 +266,9 @@ function FormsElements() {
   const handleAddItemToProvider = async () => {
     setIsLoading(true);
     const errors = [];
-    const { _ids, itemIds } = reqAddProviderToItemCode;
-    if (_ids.length < 1) errors.push("you should select at least one provider");
-    if (itemIds.length < 1) errors.push("you should select at least one item.");
+    const { _ids } = reqAddProviderToItemCode;
+    if (_ids.length !== 1) errors.push("you should select one provider");
+    if (value.length < 1) errors.push("you should select at least one item.");
     if (errors.length > 0) {
       errors.forEach(err => {
         promise = promise.then(function() {
@@ -137,41 +282,41 @@ function FormsElements() {
       return;
     }
     try {
-      const body = { _ids, itemIds };
+      const body = { _ids, itemsId: value.map(val => val._id) };
       await axios.post("/admin/providers/item", body);
       sendNotification({
-        message: "category added successfully",
+        message: "items added successfully to provider",
         color: "primary",
       });
       setIsLoading(false);
     } catch (ex) {
       sendNotification({
-        message: "an error has been occurred when try to add category",
+        message: "an error has been occurred when try to add items to provider",
         color: "secondary",
       });
+      console.log(ex.response.data);
       setIsLoading(false);
     }
   };
 
+  const fetchItemsData = async () => {
+    try {
+      const res = await axios.get("/admin/providers/item");
+      const { providers, items } = res.data;
+      setProviders(
+        providers.map(p => {
+          return { id: p.code, value: p.name };
+        }),
+      );
+      setItems(items);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   React.useEffect(() => {
-    let active = true;
-
-    if (!loading) return undefined;
-
-    (async () => {
-      const response = await axios.get("/admin/providers/item");
-      const { providers, items } = response.data;
-      if (active) setOptions(items);
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [loading]);
-
-  React.useEffect(() => {
-    if (!open) setOptions([]);
-  }, [open]);
+    fetchItemsData();
+  }, []);
 
   return (
     <>
@@ -234,6 +379,38 @@ function FormsElements() {
                   </FormHelperText>
                 </Grid>
               </Grid>
+              <Grid item container alignItems={"center"} justify="center">
+                <Grid item xs={3}>
+                  <Typography variant={"body1"}>
+                    Image
+                    <Typography variant="caption">{` (just svg)`}</Typography>
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <input
+                    accept="image/svg+xml"
+                    style={{ display: "none" }}
+                    id="contained-button-file"
+                    multiple
+                    type="file"
+                    onChange={e =>
+                      setProviderDetail({
+                        ...providerDetail,
+                        image: e.target.files[0],
+                      })
+                    }
+                  />
+                  <label htmlFor="contained-button-file">
+                    <Button
+                      color="primary"
+                      component="span"
+                      startIcon={<PhotoCameraIcon />}
+                    >
+                      Upload
+                    </Button>
+                  </label>
+                </Grid>
+              </Grid>
               <Grid item container justify="flex-end">
                 <Grid item>
                   {isLoading ? (
@@ -273,52 +450,52 @@ function FormsElements() {
             <Grid container direction={"column"} spacing={3}>
               <Grid item container alignItems={"center"} justify="center">
                 <Grid item xs={3} md={3}>
-                  <Typography variant={"body1"}>Item</Typography>
+                  <Typography variant={"body1"}>Providers</Typography>
                 </Grid>
-                <Grid item container alignItems={"center"} xs={6}>
-                  <Autocomplete
-                    id="asynchronous-demo"
-                    style={{ width: 300 }}
-                    open={open}
-                    onOpen={() => {
-                      setOpen(true);
-                    }}
-                    onClose={() => {
-                      setOpen(false);
-                    }}
-                    getOptionSelected={(option, value) =>
-                      option.name === value.name
-                    }
-                    getOptionLabel={option => option.name}
-                    options={options}
-                    loading={loading}
-                    renderInput={params => (
-                      <TextField
-                        {...params}
-                        label="Asynchronous"
-                        variant="outlined"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <React.Fragment>
-                              {loading ? (
-                                <CircularProgress color="inherit" size={20} />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </React.Fragment>
-                          ),
-                        }}
-                      />
-                    )}
+                <Grid item xs={6}>
+                  <SelectPlace
+                    value={reqAddProviderToItemCode.name}
+                    onChange={handleProvidersChange}
+                    items={providers}
                   />
-                  );
                 </Grid>
               </Grid>
               <Grid item container alignItems={"center"} justify="center">
                 <Grid item xs={3} md={3}>
-                  <Typography variant={"body1"}>Providers</Typography>
+                  <Typography variant={"body1"}>Item</Typography>
                 </Grid>
-                <Grid item xs={6}></Grid>
+                <Grid item container alignItems={"center"} xs={6}>
+                  <NoSsr>
+                    <div>
+                      <div {...getRootProps()}>
+                        <Label {...getInputLabelProps()}>Items</Label>
+                        <InputWrapper
+                          ref={setAnchorEl}
+                          className={focused ? "focused" : ""}
+                        >
+                          {value.map((option, index) => (
+                            <Tag
+                              label={option.title}
+                              {...getTagProps({ index })}
+                            />
+                          ))}
+
+                          <input {...getInputProps()} />
+                        </InputWrapper>
+                      </div>
+                      {groupedOptions.length > 0 ? (
+                        <Listbox {...getListboxProps()}>
+                          {groupedOptions.map((option, index) => (
+                            <li {...getOptionProps({ option, index })}>
+                              <span>{option.title}</span>
+                              <CheckIcon fontSize="small" />
+                            </li>
+                          ))}
+                        </Listbox>
+                      ) : null}
+                    </div>
+                  </NoSsr>
+                </Grid>
               </Grid>
               <Grid item container justify="flex-end">
                 <Grid item>

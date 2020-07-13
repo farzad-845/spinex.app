@@ -139,13 +139,13 @@ function FormsElements() {
       formData.append("title", title);
       await axios.post("/admin/items", formData);
       sendNotification({
-        message: "category added successfully",
+        message: "item added successfully",
         color: "primary",
       });
       setIsLoading(false);
     } catch (ex) {
       sendNotification({
-        message: "an error has been occurred when try to add category",
+        message: "an error has been occurred when try to add item",
         color: "secondary",
       });
       setIsLoading(false);

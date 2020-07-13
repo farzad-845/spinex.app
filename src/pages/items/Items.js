@@ -38,10 +38,15 @@ function FormsElements() {
   };
 
   const deleteItem = (id, history) => {
-    axios.delete("/admin/items/" + id).then(() => {
-      if (history.location.pathname !== "/app/items")
-        history.push("/app/items");
-    });
+    axios
+      .delete("/admin/items/" + id)
+      .then(() => {
+        if (history.location.pathname !== "/app/items")
+          history.push("/app/items");
+      })
+      .catch(ex => {
+        console.error(ex.response.data);
+      });
     fetchItemsData();
   };
 
@@ -65,7 +70,7 @@ function FormsElements() {
                 style={{
                   width: 100,
                   height: 100,
-                  objectFit: "cover",
+                  objectFit: "contain",
                   objectPosition: "center",
                 }}
               />

@@ -15,7 +15,7 @@ import { withRouter } from "react-router-dom";
 import useStyles from "./styles";
 
 // logo
-import logo from "./logo.svg";
+import logo from "./logo.png";
 
 // context
 import { useUserDispatch, loginUser } from "../../context/UserContext";
@@ -32,6 +32,8 @@ function Login(props) {
   var [activeTabId, setActiveTabId] = useState(0);
   var [loginValue, setLoginValue] = useState("");
   var [passwordValue, setPasswordValue] = useState("");
+
+  const date = new Date();
 
   return (
     <Grid container className={classes.container}>
@@ -53,7 +55,13 @@ function Login(props) {
 
           <React.Fragment>
             <Typography variant="h1" className={classes.greeting}>
-              Good Morning, User
+              {date.getHours() >= 6 && date.getHours() < 12
+                ? "Good Morning, User"
+                : date.getHours() >= 12 && date.getHours() < 17
+                ? "Good Afternoon, User"
+                : date.getHours() >= 17 && date.getHours() < 20
+                ? "Good Evening, User"
+                : "Good Night, User"}
             </Typography>
             <div className={classes.formDividerContainer}>
               <div className={classes.formDivider} />
@@ -128,7 +136,7 @@ function Login(props) {
           </React.Fragment>
         </div>
         <Typography color="primary" className={classes.copyright}>
-          © 2014-2019 Flatlogic, LLC. All rights reserved.
+          © 2020 SpinEx. All rights reserved.
         </Typography>
       </div>
     </Grid>
