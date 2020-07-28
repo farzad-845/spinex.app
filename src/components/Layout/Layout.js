@@ -11,6 +11,7 @@ import Sidebar from "../Sidebar";
 
 // pages
 import Items from "../../pages/items";
+import Orders from "../../pages/orders"
 import AddItems from "../../pages/addItems";
 import Settings from "../../pages/settings";
 import Providers from "../../pages/providers";
@@ -39,6 +40,7 @@ function Layout(props) {
           <div className={classes.fakeToolbar} />
           <Switch>
             <Route path="/app/items" component={Items} />
+            <Route path="/app/orders" component={Orders} />
             <Route path="/app/addItem" component={AddItems} />
             <Route path="/app/settings" component={Settings} />
             <Route path="/app/providers" component={Providers} />

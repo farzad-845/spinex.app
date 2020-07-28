@@ -8,6 +8,7 @@ import {
   AddShoppingCartOutlined as AddItemIcon,
   SettingsOutlined as SettingsIcon,
   ArrowBack as ArrowBackIcon,
+  ListAlt as ListIcon
 } from "@material-ui/icons";
 import { useTheme } from "@material-ui/styles";
 import { withRouter } from "react-router-dom";
@@ -28,35 +29,36 @@ import {
 
 const structure = [
   { id: 0, label: "Dashboard", link: "/app/dashboard", icon: <HomeIcon /> },
-  { id: 1, type: "divider" },
+  { id: 1, label: "Orders", link: "/app/orders", icon: <ListIcon /> },
+  { id: 2, type: "divider" },
   {
-    id: 2,
+    id: 3,
     label: "Items",
     link: "/app/items",
     icon: <ItemsIcon />,
   },
   {
-    id: 3,
+    id: 4,
     label: "Providers",
     link: "/app/providers",
     icon: <ProvidersIcon />,
   },
-  { id: 4, type: "divider" },
+  { id: 5, type: "divider" },
   {
-    id: 5,
+    id: 6,
     label: "Add Items",
     link: "/app/addItem",
     icon: <AddItemIcon />,
   },
   {
-    id: 6,
+    id: 7,
     label: "Add Provider",
     link: "/app/addProvider",
     icon: <AddProviderIcon />,
   },
-  { id: 7, type: "divider" },
+  { id: 8, type: "divider" },
   {
-    id: 8,
+    id: 9,
     label: "Settings",
     link: "/app/settings",
     icon: <SettingsIcon />,
