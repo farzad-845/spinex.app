@@ -157,6 +157,7 @@ function FormsElements() {
   const [items, setItems] = React.useState([]);
   const [providers, setProviders] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [password, setPassword] = React.useState(null);
   const [providerDetail, setProviderDetail] = React.useState({
     name: "",
     code: "",
@@ -247,14 +248,17 @@ function FormsElements() {
       formData.append("image", image);
       formData.append("code", code);
       formData.append("name", name);
-      await axios.post("/admin/providers/add", formData);
+      const response = await axios.post("/admin/providers/add", formData);
       sendNotification({
         message: "provider added successfully",
         color: "primary",
       });
+      console.log(response.data);
+      setPassword(response.data.password);
       fetchItemsData();
       setIsLoading(false);
     } catch (ex) {
+      console.error(ex.response);
       sendNotification({
         message: "an error has been occurred when try to add provider",
         color: "secondary",
@@ -411,6 +415,19 @@ function FormsElements() {
                   </label>
                 </Grid>
               </Grid>
+              {password && (
+                <Grid item container alignItems={"center"} justify="center">
+                  <Grid item xs={3} md={3}>
+                    <Typography variant={"body1"}>Password</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant={"body1"}>{password}</Typography>
+                    <FormHelperText id="component-helper-text">
+                      password of provider
+                    </FormHelperText>
+                  </Grid>
+                </Grid>
+              )}
               <Grid item container justify="flex-end">
                 <Grid item>
                   {isLoading ? (
