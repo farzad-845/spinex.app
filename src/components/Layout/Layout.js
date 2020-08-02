@@ -20,6 +20,8 @@ import AddProviders from "../../pages/addProviders";
 
 // context
 import { useLayoutState } from "../../context/LayoutContext";
+import { OrdersProvider } from '../../context/OrdersContext';
+
 
 function Layout(props) {
   var classes = useStyles();
@@ -40,7 +42,11 @@ function Layout(props) {
           <div className={classes.fakeToolbar} />
           <Switch>
             <Route path="/app/items" component={Items} />
-            <Route path="/app/orders" component={Orders} />
+            <Route path="/app/orders" exact>
+              <OrdersProvider>
+                <Orders/>
+              </OrdersProvider>
+            </Route>
             <Route path="/app/addItem" component={AddItems} />
             <Route path="/app/settings" component={Settings} />
             <Route path="/app/providers" component={Providers} />
